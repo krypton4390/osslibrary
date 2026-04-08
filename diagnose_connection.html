@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Library Connection Diagnoser</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f1f5f9; padding: 40px; }
+        .card { background: #1e293b; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 800px; margin: 0 auto; }
+        h1 { color: #38bdf8; text-align: center; margin-bottom: 30px; }
+        .step { margin-bottom: 20px; padding: 15px; border-bottom: 1px solid #334155; }
+        .status { font-weight: bold; padding: 3px 8px; border-radius: 4px; display: inline-block; }
+        .success { color: #4ade80; background: rgba(74, 222, 128, 0.1); }
+        .error { color: #f87171; background: rgba(248, 113, 113, 0.1); }
+        .pending { color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
+        code { background: #000; padding: 2px 5px; border-radius: 3px; color: #fbbf24; }
+        #error-log { margin-top: 20px; background: #000; color: #4ade80; padding: 15px; border-radius: 8px; font-family: 'Courier New', Courier, monospace; height: 150px; overflow-y: scroll; font-size: 13px; }
+        button { background: #38bdf8; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: all 0.3s; }
+        button:hover { background: #0ea5e9; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Cloud Sync Diagnoser</h1>
+        
+        <div id="steps">
+            <div class="step">
+                1. Checking Protocol: <span id="protocol" class="status pending">TESTING...</span>
+                <p id="protocol-msg" style="font-size: 12px; margin-top: 5px;"></p>
+            </div>
+            <div class="step">
+                2. Checking Library: <code>supabase.js</code> <span id="lib" class="status pending">TESTING...</span>
+            </div>
+            <div class="step">
+                3. Checking Network: <code>vmyzdpgcrzagyaowimng.supabase.co</code> <span id="network" class="status pending">TESTING...</span>
+            </div>
+            <div class="step">
+                4. Checking Cloud Login Status: <span id="cloud" class="status pending">TESTING...</span>
+            </div>
+        </div>
+
+        <div id="error-log">Initializing system tests...<br></div>
+        <br>
+        <button onclick="runDiagnostic()">RE-RUN TESTS</button>
+    </div>
+
+    <script src="supabase.js"></script>
+    <script>
+        function log(msg, color) {
+            const div = document.getElementById('error-log');
+            const time = new Date().toLocaleTimeString();
+            div.innerHTML += `<span style="color:${color || '#4ade80'}">[${time}] ${msg}</span><br>`;
+            div.scrollTop = div.scrollHeight;
+        }
+
+        async function runDiagnostic() {
+            document.getElementById('error-log').innerHTML = "Initializing system tests...<br>";
+            log("System Check Started...");
+
+            // 1. Protocol Test
+            const protocol = window.location.protocol;
+            const protocolSpan = document.getElementById('protocol');
+            const protocolMsg = document.getElementById('protocol-msg');
+            
+            if (protocol === 'file:') {
+                protocolSpan.innerText = 'LOCAL FILE';
+                protocolSpan.className = 'status error';
+                protocolMsg.innerHTML = '<b>WARNING:</b> Security error likely. Use <code>START_LIBRARY.bat</code> instead.';
+                log("Local File Mode detected. Browsers usually block cloud sync in this mode.", "#f87171");
+            } else {
+                protocolSpan.innerText = 'SERVER (OK)';
+                protocolSpan.className = 'status success';
+                log("Server Mode detected via " + protocol);
+            }
+
+            // 2. Library Test
+            const libSpan = document.getElementById('lib');
+            if (window.supabase) {
+                libSpan.innerText = 'LOADED';
+                libSpan.className = 'status success';
+                log("supabase.js found and running.");
+            } else {
+                libSpan.innerText = 'NOT FOUND';
+                libSpan.className = 'status error';
+                log("ERROR: supabase.js failed to load. Check file path.", "#f87171");
+            }
+
+            // 3. Network Test (The real test)
+            const netSpan = document.getElementById('network');
+            try {
+                // We hitting the health check endpoint which is public
+                const response = await fetch('https://vmyzdpgcrzagyaowimng.supabase.co/rest/v1/', {
+                    method: 'GET',
+                    headers: { 'apikey': 'sb_publishable_eBwucaUCu0Y29GvhRQfKoA_ZhqWxplS' }
+                });
+                
+                // If it responds with anything (even 401), the NETWORK is open.
+                if (response.status === 401 || response.ok) {
+                    netSpan.innerText = 'SERVER REACHABLE';
+                    netSpan.className = 'status success';
+                    log("Network Check: Cloud Server is responding.");
+                } else {
+                    throw new Error("HTTP " + response.status);
+                }
+            } catch (e) {
+                netSpan.innerText = 'BLOCKED (' + e.message + ')';
+                netSpan.className = 'status error';
+                log("NETWORK ERROR: " + e.message, "#f87171");
+                log("This is usually a Browser Security Block (CORS).", "#fbbf24");
+            }
+
+            // 4. Cloud Initialization
+            const cloudSpan = document.getElementById('cloud');
+            try {
+                const client = window.supabase.createClient(
+                    'https://vmyzdpgcrzagyaowimng.supabase.co',
+                    'sb_publishable_eBwucaUCu0Y29GvhRQfKoA_ZhqWxplS'
+                );
+                const { data, error } = await client.from('books').select('count', { count: 'exact', head: true });
+                if (error) throw error;
+                cloudSpan.innerText = 'SUCCESS';
+                cloudSpan.className = 'status success';
+                log("Full Cloud Authentication Succeeded!");
+            } catch (e) {
+                cloudSpan.innerText = 'FAILS';
+                cloudSpan.className = 'status error';
+                log("INIT ERROR: " + e.message, "#f87171");
+            }
+        }
+
+        // Run instantly
+        window.onload = runDiagnostic;
+    </script>
+</body>
+</html>
