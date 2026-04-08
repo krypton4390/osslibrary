@@ -1,9 +1,8 @@
-
     const supabaseUrl = 'https://vmyzdpgcrzagyaowimng.supabase.co';
     const supabaseKey = 'sb_publishable_eBwucaUCu0Y29GvhRQfKoA_ZhqWxplS';
-    let supabase = null;
+    let sbClient = null;
     try { 
-        if (window.supabase) supabase = window.supabase.createClient(supabaseUrl, supabaseKey); 
+        if (window.supabase) sbClient = window.supabase.createClient(supabaseUrl, supabaseKey); 
     } catch (e) { console.error('Supabase init skipped', e); }
 
     // ==================== DATA ====================
@@ -61,8 +60,8 @@
             
             // 2. Fetch live books from Supabase seamlessly in the background
             try {
-                if (supabase) {
-                    supabase.from('books').select('*').then(function(result) {
+                if (sbClient) {
+                    sbClient.from('books').select('*').then(function(result) {
                         const data = result.data;
                         const error = result.error;
                         if (!error && data && data.length > 0) {

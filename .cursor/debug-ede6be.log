@@ -1,0 +1,6 @@
+{"sessionId":"ede6be","runId":"post-fix","hypothesisId":"H9","location":"dashboard.html:851","message":"post-fix upload submit fired","data":{"url":"http://127.0.0.1:5501/dashboard.html"},"timestamp":1775638679891}
+{"sessionId":"ede6be","runId":"pre-fix","hypothesisId":"H6","location":"dashboard.html:850","message":"handleUpload triggered","data":{"hasEvent":true,"hasForm":true},"timestamp":1775638679889}
+{"sessionId":"ede6be","runId":"pre-fix","hypothesisId":"H7","location":"dashboard.html:944","message":"Skipped storage upload branch","data":{"hasFile":true,"hasSupabase":false,"lastCloudError":"Awaiting cloud signal..."},"timestamp":1775638679893}
+{"sessionId":"ede6be","runId":"post-fix","hypothesisId":"H9","location":"dashboard.html:851","message":"post-fix upload submit fired","data":{"url":"http://127.0.0.1:5501/dashboard.html"},"timestamp":1775639281037}
+{"sessionId":"ede6be","runId":"pre-fix","hypothesisId":"H6","location":"dashboard.html:850","message":"handleUpload triggered","data":{"hasEvent":true,"hasForm":true},"timestamp":1775639281035}
+{"sessionId":"ede6be","runId":"pre-fix","hypothesisId":"H7","location":"dashboard.html:944","message":"Skipped storage upload branch","data":{"hasFile":true,"hasSupabase":false,"lastCloudError":"Awaiting cloud signal..."},"timestamp":1775639281039}
